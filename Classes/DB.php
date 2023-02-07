@@ -1,43 +1,33 @@
 <?php
 
-/**
- * Handle MySQL Connection with PDO.
- * Class DB
- */
-class DB
+class DbPDO
 {
-    private string $server = 'localhost';
-    private string $db = 'live';
-    private string $user = 'root';
-    private string $pwd = '';
+    private static string $server = 'localhost';
+    private static string $username = 'root';
+    private static string $password = '';
+    private static string $database = 'table_test_php';
+    private static ?PDO $db = null;
 
-    private static PDO $dbInstance;
+    public static function connect(): ?PDO {
+        if (self::$db == null){
+            try {
+                self::$db = new PDO("mysql:host=".self::$server.";dbname=".self::$database, self::$username, self::$password);
+                self::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                self::$db->beginTransaction();
 
-    /**
-     * DbStatic constructor.
-     */
-    public function __construct() {
-        try {
-            self::$dbInstance = new PDO("mysql:host=$this->server;dbname=$this->db;charset=utf8", $this->user, $this->pwd);
-            self::$dbInstance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $sql = "TRUNCATE TABLE user";
+                if (self::$db->exec($sql) !== false){
+                    echo "Contenu supprimé";
+                }
+                else{
+                    echo "Problème";
+                }
+            }
+            catch (PDOException $e) {
+                echo "Erreur de la connexion à la dn : " . $e->getMessage();
+                self::$db->rollBack(); // On restaure les anciens données en cas d'erreur
+            }
         }
-        catch(PDOException $exception) {
-            echo $exception->getMessage();
-        }
+        return self::$db;
     }
-
-    /**
-     * Return PDO instance.
-     */
-    public static function getInstance(): ?PDO {
-        if( is_null(self::$dbInstance) ) {
-            new self();
-        }
-        return self::$dbInstance;
-    }
-
-    /**
-     * Avoid instance to be cloned.
-     */
-    public function __clone() {}
 }

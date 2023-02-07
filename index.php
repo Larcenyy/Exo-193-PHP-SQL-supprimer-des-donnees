@@ -10,3 +10,6 @@
  *    --> Finalement, vous décidez de supprimer complètement la table
  *    --> Et pour finir, comme vous n'avez plus de table dans la base de données, vous décidez de supprimer aussi la base de données.
  */
+
+require "Classes/DB.php";
+DbPDO::connect();
